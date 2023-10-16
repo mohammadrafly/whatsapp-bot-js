@@ -92,6 +92,10 @@ class WhatsAppBot {
       if (userNumber === '628980659056@c.us' && body === 'mas') {
         this.client.sendMessage(userNumber, 'dhalem dek');
       }
+
+      if (userNumber === '628980659056@c.us' && body === 'mas') {
+        this.client.sendMessage(userNumber, 'dhalem dek');
+      }
     }
   
     async handleReady() {
@@ -99,6 +103,7 @@ class WhatsAppBot {
     }
 
     isInvalidUserNumber(userNumber) {
+      console.log(userNumber)
       return userNumber && userNumber.match(/^628\d{10}-\d+@g\.us$/);
     }
   }

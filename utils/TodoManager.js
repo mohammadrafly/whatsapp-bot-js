@@ -1,5 +1,3 @@
-const schedule = require('node-schedule');
-
 class TodoManager {
   constructor(client, db) {
     this.client = client;
@@ -21,15 +19,6 @@ class TodoManager {
     const sender = message.from;
     const task = { title, description, time, date, month, year, sender, created_at };
 
-    const deadlineDate = new Date(`${year}-${month}-${date}T${time}`);
-    const now = new Date();
-    const timeDifference = deadlineDate - now;
-
-    if (timeDifference <= 0) {
-      this.client.sendMessage(userNumber, 'Deadline sudah berlalu.');
-      return;
-    }
-
     this.saveTodoToFirebase(sanitizedUserNumber, task)
       .then(() => {
         const successMessage = 'Tugas berhasil ditambahkan:';
@@ -37,31 +26,11 @@ class TodoManager {
         const newTaskMessage = `Judul: ${title}\nDeskripsi: ${description}\nDeadline: ${deadline}`;
         const responseMessage = `${successMessage}\n${newTaskMessage}`;
         this.client.sendMessage(userNumber, responseMessage);
-        this.scheduleReminder(userNumber, title, deadlineDate);
       })
       .catch((error) => {
         console.error('Error saving task to Firebase:', error);
         this.client.sendMessage(userNumber, 'Tidak dapat menyimpan tugas. Coba lagi nanti.');
       });
-  }
-
-  scheduleReminder(userNumber, taskTitle, deadlineDate) {
-    const interval = 10 * 60 * 1000;
-
-    const reminderJob = schedule.scheduleJob(deadlineDate, () => {
-      const now = new Date();
-      const timeDifference = deadlineDate - now;
-
-      if (timeDifference <= 0) {
-        const reminderMessage = `Deadline for "${taskTitle}" has passed!`;
-        this.client.sendMessage(userNumber, reminderMessage);
-        reminderJob.cancel();
-      } else {
-        const reminderMessage = `Deadline for "${taskTitle}" is in ${Math.floor(timeDifference / 60000)} minutes!`;
-        this.client.sendMessage(userNumber, reminderMessage);
-        deadlineDate.setTime(deadlineDate.getTime() + interval);
-      }
-    });
   }
 
   async listTodos(message) {
