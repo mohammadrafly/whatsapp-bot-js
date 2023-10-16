@@ -4,7 +4,11 @@ const { MessageMedia } = require('whatsapp-web.js');
 const iDownloader = new imageDownloader();
 
 class MakananManager {
-  static async getMealInfo() {
+  constructor(client) {
+    this.client = client;
+  }
+
+  async getMealInfo() {
     const mealResponse = await axios.get('https://www.themealdb.com/api/json/v1/1/random.php');
     const mealData = mealResponse.data.meals[0];
 
@@ -22,7 +26,8 @@ class MakananManager {
     }
   }
 
-  static async sendRandomMeal(client, userNumber) {
+  async sendRandomMeal(message) {
+    const userNumber = message.from;
     const mealInfo = await this.getMealInfo();
 
     if (mealInfo) {
@@ -43,7 +48,7 @@ class MakananManager {
         const media = MessageMedia.fromFilePath(thumbFilename);
         const responseMessage = `Makanan Hari Ini: ${mealName}\nInstruksi: ${mealInstructions}`;
         
-        client.sendMessage(userNumber, media, {
+        this.client.sendMessage(userNumber, media, {
           caption: responseMessage
         });
       } catch (error) {
@@ -51,7 +56,7 @@ class MakananManager {
       }
     } else {
       const errorMessage = 'Maaf, tidak dapat menemukan informasi makanan saat ini.';
-      client.sendMessage(userNumber, errorMessage);
+      this.client.sendMessage(userNumber, errorMessage);
     }
   }
 }

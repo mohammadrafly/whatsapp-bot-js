@@ -8,8 +8,8 @@ class UtilityManager {
   constructor(client, db) {
     this.todoManager = new TodoManager(client, db);
     this.menuManager = new MenuManager(client);
-    this.makananManager = new MakananManager();
-    this.stickerManager = new StickerManager();
+    this.makananManager = new MakananManager(client);
+    this.stickerManager = new StickerManager(client);
     this.whatsAppBot = new WhatsAppBot(client, this.menuManager, this.todoManager, this.makananManager, this.stickerManager);
   }
 

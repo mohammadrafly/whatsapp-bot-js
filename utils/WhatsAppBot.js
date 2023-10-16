@@ -1,12 +1,12 @@
 const qrcode = require('qrcode-terminal');
 
 class WhatsAppBot {
-    constructor(client, menuManager, todoManager, MakananManager, StickerManager) {
+    constructor(client, menuManager, todoManager, makananManager, stickerManager) {
       this.client = client;
       this.menuManager = menuManager;
       this.todoManager = todoManager;
-      this.MakananManager = MakananManager;
-      this.StickerManager = StickerManager;
+      this.makananManager = makananManager;
+      this.stickerManager = stickerManager;
   
       this.client.on('qr', this.handleQRCode.bind(this));
       this.client.on('message', this.handleMessage.bind(this));
@@ -84,9 +84,9 @@ class WhatsAppBot {
       } else if (body.startsWith('!add/')) {
         this.todoManager.addTodoWithReminder(msg);
       } else if (body.startsWith('!airdrop')) {
-        this.MakananManager.sendRandomMeal(this.client, userNumber);
+        this.makananManager.sendRandomMeal(msg);
       } else if (msg.hasMedia && body.startsWith('!sticker/')) {
-        this.StickerManager.createSticker(msg, this.client);
+        this.stickerManager.createSticker(msg);
       }
   
       if (userNumber === '628980659056@c.us' && body === 'mas') {

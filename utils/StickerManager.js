@@ -2,8 +2,12 @@ const fs = require('fs');
 const { MessageMedia } = require('whatsapp-web.js');
 
 class StickerManager {
-  static async createSticker(msg, client) {
-    const media = await msg.downloadMedia();
+  constructor(client) {
+    this.client = client;
+  }
+
+  async createSticker(message) {
+    const media = await message.downloadMedia();
 
     if (media instanceof MessageMedia && media.mimetype.includes('image/jpeg')) {
       const imageBuffer = Buffer.from(media.data, 'base64');
@@ -16,7 +20,7 @@ class StickerManager {
 
       fs.writeFileSync(filename, imageBuffer);
 
-      const parameters = msg.body.substring('!sticker/'.length).split('/');
+      const parameters = message.body.substring('!sticker/'.length).split('/');
 
       if (parameters.length === 2) {
         const [stickerAuthor, stickerNames] = parameters;
@@ -24,16 +28,16 @@ class StickerManager {
         const sticker = MessageMedia.fromFilePath(filename);
 
         if (sticker) {
-          client.sendMessage(msg.from, sticker, {
+          this.client.sendMessage(message.from, sticker, {
             sendMediaAsSticker: true,
             stickerAuthor: stickerAuthor,
             stickerName: stickerNames,
           });
         } else {
-          client.sendMessage(msg.from, 'Failed to create a sticker from the media.');
+            this.client.sendMessage(message.from, 'Failed to create a sticker from the media.');
         }
       } else {
-        client.sendMessage(msg.from, 'Invalid sticker parameters. Usage: !sticker/author/names');
+        this.client.sendMessage(message.from, 'Invalid sticker parameters. Usage: !sticker/author/names');
       }
     }
   }
