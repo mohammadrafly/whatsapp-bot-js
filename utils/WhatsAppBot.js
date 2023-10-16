@@ -1,4 +1,6 @@
 const qrcode = require('qrcode-terminal');
+const OpenAI = require("openai");
+require('dotenv').config();
 
 class WhatsAppBot {
     constructor(client, menuManager, todoManager, makananManager, stickerManager) {
@@ -17,6 +19,25 @@ class WhatsAppBot {
       this.client.initialize();
     }
   
+    async generateResponse(message) {
+      const apiKey = process.env.OPENAI_API_KEY;
+      const prompt = `User said: "${message}"`;
+  
+      const openai = new OpenAI({ apiKey });
+  
+      try {
+        const chatCompletion = await openai.chat.completions.create({
+          messages: [{ role: "user", content: prompt }],
+          model: "gpt-3.5-turbo",
+        });
+  
+        return chatCompletion.choices[0].message.content;
+      } catch (error) {
+        console.error(error);
+        return ''; 
+      }
+    }
+
     async handleQRCode() {
       if (this.client.isReady) {
         console.log('Client is already ready, no need to render QR code.');
@@ -70,13 +91,18 @@ class WhatsAppBot {
     async handleMessage(msg) {
       const userNumber = msg.from;
   
-      if (this.isInvalidUserNumber(userNumber)) {
-        return;
-      }
+      //if (this.isInvalidUserNumber(userNumber)) {
+        //return;
+      //}
   
       const body = msg.body.toLowerCase();
       console.log(userNumber);
-  
+      //if (userNumber === '6281998282950-1634949707@g.us') {
+      //  if (msg.hasMedia && body.startsWith('!sticker')) {
+      //    this.stickerManager.createSticker(msg);
+      //  }
+      //}
+
       if (body === '!menu') {
         this.menuManager.Menu(msg);
       } else if (body.startsWith('!list')) {
@@ -89,19 +115,26 @@ class WhatsAppBot {
         this.stickerManager.createSticker(msg);
       }
   
-      if (userNumber === '628980659056@c.us' && body === 'mas') {
-        this.client.sendMessage(userNumber, 'dhalem dek');
-      }
+      if (userNumber === '628980659056@c.us' || userNumber === '6281907861308@c.us') {
+        this.generateResponse(body)
+          .then((response) => {
+            this.client.sendMessage(userNumber, response);
+          })
+          .catch((error) => {
+            console.error(error);
+            this.client.sendMessage(userNumber, `Opps.. theres something wrong with me.`)
+          });
+      }      
     }
   
     async handleReady() {
       console.log('\nClient is now ready.');
     }
 
-    isInvalidUserNumber(userNumber) {
-      console.log(userNumber)
-      return userNumber && userNumber.match(/^628\d{10}-\d+@g\.us$/);
-    }
+    //isInvalidUserNumber(userNumber) {
+    //  console.log(userNumber)
+    //  return userNumber && userNumber.match(/^628\d{10}-\d+@g\.us$/);
+    //}
   }
   
   module.exports = WhatsAppBot;
