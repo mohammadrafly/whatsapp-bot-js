@@ -13,7 +13,7 @@ class MenuManager {
 1. Convert Foto Menjadi Sticker:
    Kirim foto via Gallery dan beri CAPTION "!sticker"
    
-1. Hapus Background Foto:
+2. Hapus Background Foto:
    Kirim foto via Gallery dan beri CAPTION "!remove-bg"
    
 `;
