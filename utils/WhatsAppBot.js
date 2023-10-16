@@ -3,12 +3,13 @@ const OpenAI = require("openai");
 require('dotenv').config();
 
 class WhatsAppBot {
-    constructor(client, menuManager, todoManager, makananManager, stickerManager) {
+    constructor(client, menuManager, todoManager, makananManager, stickerManager, removeBackground) {
       this.client = client;
       this.menuManager = menuManager;
       this.todoManager = todoManager;
       this.makananManager = makananManager;
       this.stickerManager = stickerManager;
+      this.removeBackground = removeBackground;
   
       this.client.on('qr', this.handleQRCode.bind(this));
       this.client.on('message', this.handleMessage.bind(this));
@@ -91,17 +92,8 @@ class WhatsAppBot {
     async handleMessage(msg) {
       const userNumber = msg.from;
   
-      //if (this.isInvalidUserNumber(userNumber)) {
-        //return;
-      //}
-  
       const body = msg.body.toLowerCase();
       console.log(userNumber);
-      //if (userNumber === '6281998282950-1634949707@g.us') {
-      //  if (msg.hasMedia && body.startsWith('!sticker')) {
-      //    this.stickerManager.createSticker(msg);
-      //  }
-      //}
 
       if (body === '!menu') {
         this.menuManager.Menu(msg);
@@ -113,8 +105,11 @@ class WhatsAppBot {
         this.makananManager.sendRandomMeal(msg);
       } else if (msg.hasMedia && body.startsWith('!sticker')) {
         this.stickerManager.createSticker(msg);
+      } else if (msg.hasMedia && body.startsWith('!remove-bg')) {
+        this.removeBackground.removeBackground(msg)
       }
   
+      /** 
       if (userNumber === '628980659056@c.us' || userNumber === '6281907861308@c.us') {
         this.generateResponse(body)
           .then((response) => {
@@ -124,17 +119,13 @@ class WhatsAppBot {
             console.error(error);
             this.client.sendMessage(userNumber, `Opps.. theres something wrong with me.`)
           });
-      }      
+      }   
+      **/   
     }
   
     async handleReady() {
       console.log('\nClient is now ready.');
     }
-
-    //isInvalidUserNumber(userNumber) {
-    //  console.log(userNumber)
-    //  return userNumber && userNumber.match(/^628\d{10}-\d+@g\.us$/);
-    //}
   }
   
   module.exports = WhatsAppBot;
