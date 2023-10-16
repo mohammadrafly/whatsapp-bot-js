@@ -85,14 +85,10 @@ class WhatsAppBot {
         this.todoManager.addTodoWithReminder(msg);
       } else if (body.startsWith('!airdrop')) {
         this.makananManager.sendRandomMeal(msg);
-      } else if (msg.hasMedia && body.startsWith('!sticker/')) {
+      } else if (msg.hasMedia && body.startsWith('!sticker')) {
         this.stickerManager.createSticker(msg);
       }
   
-      if (userNumber === '628980659056@c.us' && body === 'mas') {
-        this.client.sendMessage(userNumber, 'dhalem dek');
-      }
-
       if (userNumber === '628980659056@c.us' && body === 'mas') {
         this.client.sendMessage(userNumber, 'dhalem dek');
       }

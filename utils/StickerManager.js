@@ -20,25 +20,22 @@ class StickerManager {
 
       fs.writeFileSync(filename, imageBuffer);
 
-      const parameters = message.body.substring('!sticker/'.length).split('/');
+      const author = 'BOT';
+      const stickerName = 'Default Sticker Name';
 
-      if (parameters.length === 2) {
-        const [stickerAuthor, stickerNames] = parameters;
+      const sticker = MessageMedia.fromFilePath(filename);
 
-        const sticker = MessageMedia.fromFilePath(filename);
-
-        if (sticker) {
-          this.client.sendMessage(message.from, sticker, {
-            sendMediaAsSticker: true,
-            stickerAuthor: stickerAuthor,
-            stickerName: stickerNames,
-          });
-        } else {
-            this.client.sendMessage(message.from, 'Failed to create a sticker from the media.');
-        }
+      if (sticker) {
+        this.client.sendMessage(message.from, sticker, {
+          sendMediaAsSticker: true,
+          stickerAuthor: author,
+          stickerName: stickerName,
+        });
       } else {
-        this.client.sendMessage(message.from, 'Invalid sticker parameters. Usage: !sticker/author/names');
+        this.client.sendMessage(message.from, 'Failed to create a sticker from the media.');
       }
+    } else {
+      this.client.sendMessage(message.from, 'Invalid media format. Please send a JPEG image.');
     }
   }
 }
