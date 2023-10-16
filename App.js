@@ -1,11 +1,6 @@
-const { Client, LocalAuth } = require('whatsapp-web.js');
+const UtilityManager = require('./utils/Index');
 const firebase = require('./config/firebase');
-const TodoManager = require('./utils/TodoManager');
-const MenuManager = require('./utils/MenuManager');
-const MakananManager = require('./utils/MakananManager');
-const StickerManager = require('./utils/StickerManager');
-const WhatsAppBot = require('./utils/WhatsAppBot');
-
+const { Client, LocalAuth } = require('whatsapp-web.js');
 const db = firebase.db;
 
 const client = new Client({
@@ -13,8 +8,5 @@ const client = new Client({
   ffmpegPath: 'C:/bin/ffmpeg.exe',
 });
 
-const todoManager = new TodoManager(client, db);
-const menuManager = new MenuManager(client);
-
-const bot = new WhatsAppBot(client, menuManager, todoManager, MakananManager, StickerManager);
-bot.initialize();
+const utilityManager = new UtilityManager(client, db);
+utilityManager.initialize();
