@@ -3,4 +3,4 @@
 /.wwebjs_cache
 /node_modules
 /package-lock.json
-/config/serviceAccountKey.json
+config/serviceAccountKey.json
