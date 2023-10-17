@@ -5,4 +5,4 @@
 /package-lock.json
 config/.serviceAccountKey.json
 /images
-/images/*
+images/*
