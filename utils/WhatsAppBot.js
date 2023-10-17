@@ -3,13 +3,14 @@ const OpenAI = require("openai");
 require('dotenv').config();
 
 class WhatsAppBot {
-    constructor(client, menuManager, todoManager, makananManager, stickerManager, removeBackground) {
+    constructor(client, menuManager, todoManager, makananManager, stickerManager, removeBackground, compressImage) {
       this.client = client;
       this.menuManager = menuManager;
       this.todoManager = todoManager;
       this.makananManager = makananManager;
       this.stickerManager = stickerManager;
       this.removeBackground = removeBackground;
+      this.compressImage = compressImage;
   
       this.client.on('qr', this.handleQRCode.bind(this));
       this.client.on('message', this.handleMessage.bind(this));
@@ -95,18 +96,34 @@ class WhatsAppBot {
       const body = msg.body.toLowerCase();
       console.log(userNumber);
 
-      if (body === '!menu') {
+      const formatPattern = /^628\d{10}-\d+@g\.us$/;
+
+      if (!formatPattern.test(userNumber)) {
+        this.client.sendMessage(userNumber, 'Anda saat ini berinteraksi dengan sebuah bot. Berikut adalah panduan penggunaannya:');
+        const instructions = `
+          \n- Untuk melaksanakan tindakan tertentu, harap kirimkan pesan dengan perintah khusus.
+          \n- Sebagai contoh, Anda dapat menggunakan '!menu' untuk mengakses menu.
+        `;
+      
+        this.client.sendMessage(userNumber, instructions);
+      } else if (body === '!menu') {
         this.menuManager.Menu(msg);
+      /** Untuk sementara di matikan karna fokus pada image processing
       } else if (body.startsWith('!list')) {
         this.todoManager.listTodos(msg);
       } else if (body.startsWith('!add/')) {
         this.todoManager.addTodoWithReminder(msg);
       } else if (body.startsWith('!airdrop')) {
         this.makananManager.sendRandomMeal(msg);
+      **/
       } else if (msg.hasMedia && body.startsWith('!sticker')) {
         this.stickerManager.createSticker(msg);
       } else if (msg.hasMedia && body.startsWith('!remove-bg')) {
-        this.removeBackground.removeBackground(msg)
+        this.removeBackground.removeBackground(msg);
+      } else if (msg.hasMedia && body.startsWith('!compress')) {
+        this.compressImage.compress(msg);
+      } else {
+        // Handle other cases
       }
   
       /** 
@@ -124,7 +141,15 @@ class WhatsAppBot {
     }
   
     async handleReady() {
-      console.log('\nClient is now ready.');
+      console.log(`\n
+      _______  ___      ___   _______  __    _  _______    ______    _______  _______  ______   __   __ 
+      |       ||   |    |   | |       ||  |  | ||       |  |    _ |  |       ||   _   ||      | |  | |  |
+      |       ||   |    |   | |    ___||   |_| ||_     _|  |   | ||  |    ___||  |_|  ||  _    ||  |_|  |
+      |       ||   |    |   | |   |___ |       |  |   |    |   |_||_ |   |___ |       || | |   ||       |
+      |      _||   |___ |   | |    ___||  _    |  |   |    |    __  ||    ___||       || |_|   ||_     _|
+      |     |_ |       ||   | |   |___ | | |   |  |   |    |   |  | ||   |___ |   _   ||       |  |   |  
+      |_______||_______||___| |_______||_|  |__|  |___|    |___|  |_||_______||__| |__||______|   |___|  
+      `);
     }
   }
   

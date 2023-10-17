@@ -2,6 +2,7 @@ const { removeBackgroundFromImageFile } = require("remove.bg");
 const { MessageMedia } = require('whatsapp-web.js');
 const fs = require('fs');
 require('dotenv').config();
+const sharp = require('sharp'); // You need to install the 'sharp' package using npm or yarn
 
 class BackgroundRemover {
     constructor(client) {
@@ -14,40 +15,37 @@ class BackgroundRemover {
             const imageBuffer = Buffer.from(media.data, 'base64');
 
             const directoryPath = 'images';
-            const filename = `${directoryPath}/bg-remove.png`;
+            const inputFilename = `${directoryPath}/input.png`;
+            const outputFilename = `${directoryPath}/output.png`;
 
             if (!fs.existsSync(directoryPath)) {
                 fs.mkdirSync(directoryPath);
             }
 
-            fs.writeFileSync(filename, imageBuffer);
+            fs.writeFileSync(inputFilename, imageBuffer);
 
             await removeBackgroundFromImageFile({
-                path: filename,
+                path: inputFilename,
                 apiKey: process.env.BACKGROUND_REMOVER_API_KEY,
-                size: "regular",
+                size: "auto",
                 type: "auto",
-                scale: "100%",
-                outputFile: filename,
+                scale: "original",
+                outputFile: outputFilename,
             });
+            
+            await sharp(outputFilename)
+                .sharpen()
+                .resize({ width: 3840, height: 2160, fit: 'inside' })
+                .toFile(`${directoryPath}/4k-image.png`);
 
-            const Media = MessageMedia.fromFilePath(filename);
+            const Media = MessageMedia.fromFilePath(`${directoryPath}/4k-image.png`);
             if (Media) {
                 this.client.sendMessage(message.from, Media, { sendMediaAsDocument: true });
             } else {
-                this.client.sendMessage(message.from, 'Failed to remove the background.')
+                this.client.sendMessage(message.from, 'Failed to remove the background and upscale the image to 4K.');
             }
         } catch (error) {
-            if (error.response && error.response.errors && error.response.errors.length > 0) {
-                const errorInfo = error.response.errors[0];
-                if (errorInfo.code === 'insufficient_credits') {
-                    this.client.sendMessage(message.from, 'Failed to remove the background: Insufficient credits');
-                } else {
-                    this.client.sendMessage(message.from, 'Failed to remove the background.');
-                }
-            } else {
-                this.client.sendMessage(message.from, 'Failed to remove the background.');
-            }
+            this.client.sendMessage(message.from, 'Failed to remove the background and upscale the image to 4K.');
         }
     }
 }
