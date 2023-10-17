@@ -20,20 +20,7 @@ class StickerManager {
 
       fs.writeFileSync(filename, imageBuffer);
 
-      const author = 'BOT';
-      const stickerName = 'Default Sticker Name';
-
-      const sticker = MessageMedia.fromFilePath(filename);
-
-      if (sticker) {
-        this.client.sendMessage(message.from, sticker, {
-          sendMediaAsSticker: true,
-          stickerAuthor: author,
-          stickerName: stickerName,
-        });
-      } else {
-        this.client.sendMessage(message.from, 'Failed to create a sticker from the media.');
-      }
+      return filename;
     } else {
       this.client.sendMessage(message.from, 'Invalid media format. Please send a JPEG image.');
     }

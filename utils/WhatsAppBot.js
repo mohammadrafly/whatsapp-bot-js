@@ -1,5 +1,6 @@
 const qrcode = require('qrcode-terminal');
 const OpenAI = require("openai");
+const { MessageMedia } = require('whatsapp-web.js');
 require('dotenv').config();
 
 class WhatsAppBot {
@@ -96,17 +97,7 @@ class WhatsAppBot {
       const body = msg.body.toLowerCase();
       console.log(userNumber);
 
-      const formatPattern = /^628\d{10}-\d+@g\.us$/;
-
-      if (!formatPattern.test(userNumber)) {
-        this.client.sendMessage(userNumber, 'Anda saat ini berinteraksi dengan sebuah bot. Berikut adalah panduan penggunaannya:');
-        const instructions = `
-          \n- Untuk melaksanakan tindakan tertentu, harap kirimkan pesan dengan perintah khusus.
-          \n- Sebagai contoh, Anda dapat menggunakan '!menu' untuk mengakses menu.
-        `;
-      
-        this.client.sendMessage(userNumber, instructions);
-      } else if (body === '!menu') {
+      if (body.startsWith('!menu')) {
         this.menuManager.Menu(msg);
       /** Untuk sementara di matikan karna fokus pada image processing
       } else if (body.startsWith('!list')) {
@@ -117,11 +108,56 @@ class WhatsAppBot {
         this.makananManager.sendRandomMeal(msg);
       **/
       } else if (msg.hasMedia && body.startsWith('!sticker')) {
-        this.stickerManager.createSticker(msg);
+        try {
+            const author = 'BOT';
+            const stickerName = 'Default Sticker Name';
+            const imagePath = await this.stickerManager.createSticker(msg);
+            const Media = MessageMedia.fromFilePath(imagePath);
+            if (Media) {
+                msg.reply(Media, null, {
+                    sendMediaAsSticker: true,
+                    stickerAuthor: author,
+                    stickerName: stickerName,
+                });
+            } else {
+                msg.reply('Failed to create a sticker from the media.');
+            }
+        } catch (error) {
+            console.error('Error creating sticker:', error);
+            msg.reply('Failed to create a sticker from the media.');
+        }
       } else if (msg.hasMedia && body.startsWith('!remove-bg')) {
-        this.removeBackground.removeBackground(msg);
+        try {
+            const imagePath = await this.removeBackground.removeBackground(msg);
+            const Media = MessageMedia.fromFilePath(imagePath);
+            if (Media) {
+                msg.reply(Media, null, {
+                    sendMediaAsDocument: true,
+                    caption: `Here's the result!`
+                });
+            } else {
+                msg.reply('Failed to remove the background and upscale the image to 4K.');
+            }
+        } catch (error) {
+            console.error('Error removing the background:', error);
+            msg.reply('Failed to remove the background and upscale the image to 4K.');
+        }
       } else if (msg.hasMedia && body.startsWith('!compress')) {
-        this.compressImage.compress(msg);
+        try {
+            const imagePath = await this.compressImage.compress(msg);
+            const Media = MessageMedia.fromFilePath(imagePath);
+            if (Media) {
+                msg.reply(Media, null, {
+                    sendMediaAsDocument: true,
+                    caption: `Here's the result!`
+                });
+            } else {
+                msg.reply('Failed to compress.');
+            }
+        } catch (error) {
+            console.error('Error compressing:', error);
+            msg.reply('Failed to compress.');
+        }
       } else {
         // Handle other cases
       }

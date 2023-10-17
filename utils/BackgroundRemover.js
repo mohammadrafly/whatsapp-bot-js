@@ -35,15 +35,10 @@ class BackgroundRemover {
             
             await sharp(outputFilename)
                 .sharpen()
-                .resize({ width: 3840, height: 2160, fit: 'inside' })
+                .resize(3840, 2160, { fit: 'inside' })
                 .toFile(`${directoryPath}/4k-image.png`);
 
-            const Media = MessageMedia.fromFilePath(`${directoryPath}/4k-image.png`);
-            if (Media) {
-                this.client.sendMessage(message.from, Media, { sendMediaAsDocument: true });
-            } else {
-                this.client.sendMessage(message.from, 'Failed to remove the background and upscale the image to 4K.');
-            }
+            return outputFilename;
         } catch (error) {
             this.client.sendMessage(message.from, 'Failed to remove the background and upscale the image to 4K.');
         }

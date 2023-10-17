@@ -37,12 +37,7 @@ class CompressImage {
 
                 await image.toFile(outputFilename);
 
-                const Media = MessageMedia.fromFilePath(outputFilename);
-                if (Media) {
-                    this.client.sendMessage(message.from, Media, { sendMediaAsDocument: true });
-                } else {
-                    this.client.sendMessage(message.from, 'Failed to compress.');
-                }
+                return outputFilename;
             } else {
                 this.client.sendMessage(message.from, 'Received a document. Currently, I only handle images.');
             }
